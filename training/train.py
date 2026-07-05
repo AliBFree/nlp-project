@@ -25,7 +25,7 @@ from sklearn.metrics import (
     classification_report,
 )
 
-from preprocess import get_train_test_split
+from training.preprocess import get_train_test_split
 
 MODEL_DIR = "model"
 

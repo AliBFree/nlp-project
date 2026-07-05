@@ -13,7 +13,7 @@ Usage:
 
 import sys
 import joblib
-from preprocess import clean_text
+from training.preprocess import clean_text
 
 MODEL_PATH = "model/model.joblib"
 VECTORIZER_PATH = "model/vectorizer.joblib"
