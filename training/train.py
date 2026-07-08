@@ -1,16 +1,19 @@
 """
 train.py
 --------
-Trains a TF-IDF + Logistic Regression SMS spam classifier, evaluates it,
-and exports two artifacts:
+Trains a TF-IDF + Logistic Regression SMS spam classifier for a given
+language, evaluates it, and exports:
 
-  model/model.joblib      -- the fitted LogisticRegression classifier
-  model/vectorizer.joblib -- the fitted TfidfVectorizer
+  model/model_<lang>.joblib
+  model/vectorizer_<lang>.joblib
+  model/metrics_<lang>.json
 
-Run:
-    python train.py
+Usage:
+    python train.py --lang en
+    python train.py --lang fa
 """
 
+import argparse
 import json
 import time
 import joblib
@@ -25,17 +28,17 @@ from sklearn.metrics import (
     classification_report,
 )
 
-from training.preprocess import get_train_test_split
+from preprocess import get_train_test_split
 
 MODEL_DIR = "model"
 
 
-def main():
-    print("Loading and splitting data...")
-    X_train, X_test, y_train, y_test = get_train_test_split()
-    print(f"Train size: {len(X_train)} | Test size: {len(X_test)}")
+def train(lang: str):
+    print(f"[{lang}] Loading and splitting data...")
+    X_train, X_test, y_train, y_test = get_train_test_split(lang=lang)
+    print(f"[{lang}] Train size: {len(X_train)} | Test size: {len(X_test)}")
 
-    print("\nVectorizing text with TF-IDF...")
+    print(f"[{lang}] Vectorizing text with TF-IDF...")
     vectorizer = TfidfVectorizer(
         max_features=5000,   # keep the model small and fast
         ngram_range=(1, 2),  # unigrams + bigrams catch phrases like "free entry"
@@ -44,14 +47,14 @@ def main():
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
 
-    print("Training Logistic Regression...")
+    print(f"[{lang}] Training Logistic Regression...")
     start = time.time()
     model = LogisticRegression(max_iter=1000, class_weight="balanced")
     model.fit(X_train_vec, y_train)
     train_time = time.time() - start
-    print(f"Training finished in {train_time:.2f}s (CPU only)")
+    print(f"[{lang}] Training finished in {train_time:.2f}s (CPU only)")
 
-    print("\nEvaluating on held-out test set...")
+    print(f"\n[{lang}] Evaluating on held-out test set...")
     y_pred = model.predict(X_test_vec)
 
     metrics = {
@@ -63,20 +66,23 @@ def main():
     cm = confusion_matrix(y_test, y_pred).tolist()
 
     print(json.dumps(metrics, indent=2))
-    print("\nConfusion matrix [[TN, FP], [FN, TP]]:")
+    print(f"\n[{lang}] Confusion matrix [[TN, FP], [FN, TP]]:")
     print(cm)
-    print("\nFull classification report:")
+    print(f"\n[{lang}] Full classification report:")
     print(classification_report(y_test, y_pred, target_names=["ham", "spam"]))
 
-    print(f"\nSaving model artifacts to {MODEL_DIR}/ ...")
-    joblib.dump(model, f"{MODEL_DIR}/model.joblib")
-    joblib.dump(vectorizer, f"{MODEL_DIR}/vectorizer.joblib")
+    print(f"\n[{lang}] Saving model artifacts to {MODEL_DIR}/ ...")
+    joblib.dump(model, f"{MODEL_DIR}/model_{lang}.joblib")
+    joblib.dump(vectorizer, f"{MODEL_DIR}/vectorizer_{lang}.joblib")
 
-    with open(f"{MODEL_DIR}/metrics.json", "w") as f:
+    with open(f"{MODEL_DIR}/metrics_{lang}.json", "w") as f:
         json.dump({"metrics": metrics, "confusion_matrix": cm}, f, indent=2)
 
-    print("Done. Artifacts saved.")
+    print(f"[{lang}] Done. Artifacts saved.")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lang", choices=["en", "fa"], default="en")
+    args = parser.parse_args()
+    train(args.lang)
