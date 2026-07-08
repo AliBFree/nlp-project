@@ -30,11 +30,41 @@ const MODEL_PATHS = {
 
 const UI_STRINGS = {
   en: {
+    // Composer / status / thread
     placeholder: "Type or paste an SMS message…",
     loading: "loading model…",
     ready: "ready — runs on-device",
     failed: "model failed to load",
     emptyThread: "Messages you test will appear here, scored as ham or spam.",
+
+    // Hero
+    eyebrow: "on-device text classifier",
+    heroTitle: "Spam Sense",
+    heroSub: "Paste any SMS. It's scored the instant you hit send — no server, no network call, just a model running in this tab.",
+
+    // Phone
+    phoneName: "Unknown Sender",
+
+    // Panel
+    panelTitleHow: "How to read a result",
+    legendHamLabel: "Ham",
+    legendHamCopy: "A legitimate message. Rendered as a normal received bubble.",
+    legendSpamLabel: "Spam",
+    legendSpamCopy: "Unwanted or scam text. Flagged with a red receipt line.",
+    panelTitleSample: "Try a sample",
+    panelTitleModel: "Model",
+    statsTypeLabel: "Type",
+    statsTypeValue: "TF-IDF + Logistic Regression",
+    statsAccuracyLabel: "Test accuracy",
+    statsAccuracyValue: "98.5%",
+    statsF1Label: "Test F1 (spam)",
+    statsF1Value: "0.94",
+    statsRunsLabel: "Runs",
+    statsRunsValue: "entirely in your browser",
+
+    // Footer
+    footer: "English model trained on the SMS Spam Collection dataset (Almeida & Hidalgo, UCI / Kaggle). Persian model trained on a separately collected Persian SMS dataset. Built as a learning project — not a production spam filter.",
+
     samples: [
       { label: "Free cruise winner", text: "Congratulations! You have been selected to win a free cruise. Call 09061234567 now to claim your prize!" },
       { label: "Dinner tonight?", text: "Hey, are we still on for dinner tonight at 7?" },
@@ -43,11 +73,41 @@ const UI_STRINGS = {
     ],
   },
   fa: {
+    // Composer / status / thread
     placeholder: "پیامک خود را اینجا بنویسید یا paste کنید…",
     loading: "در حال بارگذاری مدل…",
     ready: "آماده — کاملاً روی همین مرورگر اجرا می‌شود",
     failed: "بارگذاری مدل ناموفق بود",
     emptyThread: "پیام‌هایی که تست می‌کنید، اینجا به‌عنوان اسپم یا سالم نمایش داده می‌شوند.",
+
+    // Hero
+    eyebrow: "طبقه‌بند متن، اجرا روی همین دستگاه",
+    heroTitle: "اسپم‌یاب",
+    heroSub: "هر پیامکی را وارد کنید، همان لحظه بررسی می‌شود — بدون سرور، بدون درخواست شبکه، فقط یک مدل که همین‌جا در مرورگر اجرا می‌شود.",
+
+    // Phone
+    phoneName: "فرستنده ناشناس",
+
+    // Panel
+    panelTitleHow: "راهنمای خواندن نتیجه",
+    legendHamLabel: "سالم",
+    legendHamCopy: "یک پیام معتبر. به‌صورت حباب دریافتی معمولی نمایش داده می‌شود.",
+    legendSpamLabel: "اسپم",
+    legendSpamCopy: "پیام ناخواسته یا کلاهبرداری. با یک خط قرمز رسید مشخص می‌شود.",
+    panelTitleSample: "یک نمونه را امتحان کنید",
+    panelTitleModel: "مدل",
+    statsTypeLabel: "نوع مدل",
+    statsTypeValue: "TF-IDF + رگرسیون لجستیک",
+    statsAccuracyLabel: "دقت روی داده آزمایشی",
+    statsAccuracyValue: "۱۰۰٪",
+    statsF1Label: "F1 روی داده آزمایشی (اسپم)",
+    statsF1Value: "۱٫۰۰",
+    statsRunsLabel: "محل اجرا",
+    statsRunsValue: "کاملاً در همین مرورگر",
+
+    // Footer
+    footer: "مدل انگلیسی روی مجموعه‌داده SMS Spam Collection (المیدا و هیدالگو، UCI / Kaggle) آموزش دیده است. مدل فارسی روی یک مجموعه‌داده فارسی جداگانه آموزش دیده است. این پروژه یک پروژه یادگیری است — نه یک فیلتر اسپم آماده تولید.",
+
     samples: [
       { label: "برنده جایزه", text: "تبریک! شما برنده یک جایزه نقدی شده‌اید. برای دریافت همین الان با شماره زیر تماس بگیرید." },
       { label: "قرار امشب", text: "امشب ساعت هشت بریم بیرون؟" },
@@ -217,7 +277,16 @@ function renderSamples() {
 
 function applyLanguageChrome(lang) {
   const strings = UI_STRINGS[lang];
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    if (strings[key] !== undefined) {
+      el.textContent = strings[key];
+    }
+  });
+
   document.getElementById("messageInput").placeholder = strings.placeholder;
+  document.documentElement.lang = lang;
 
   const isRtl = lang === "fa";
   document.querySelectorAll("[data-rtl-aware]").forEach((el) => {

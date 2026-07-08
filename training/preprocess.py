@@ -138,17 +138,51 @@ def clean_text(text: str, lang: str = "en") -> str:
     return CLEANERS[lang](text)
 
 
+# Strips ALL digit runs (any length, any digit script) to build a
+# "template key" -- used only to detect near-duplicate messages that
+# differ solely in an embedded number (e.g. an OTP code, a shortcode,
+# an amount). This matters most for template-generated datasets, where
+# the same message shell can appear many times with only the number
+# changed. If two such variants end up on opposite sides of a
+# train/test split, the model is effectively tested on something it
+# has already memorized, which inflates evaluation metrics.
+_ANY_DIGIT_RE = re.compile(r"[0-9\u06F0-\u06F9\u0660-\u0669]+")
+
+
+def _template_key(clean: str) -> str:
+    return _ANY_DIGIT_RE.sub("N", clean)
+
+
 # ---------------------------------------------------------------------
 # Shared loading / splitting logic
 # ---------------------------------------------------------------------
 
-def load_dataset(lang: str = "en", path: str = None) -> pd.DataFrame:
-    """Read the raw tab-separated file into a DataFrame with clean text."""
+def load_dataset(lang: str = "en", path: str = None, dedup_templates: bool = True) -> pd.DataFrame:
+    """Read the raw tab-separated file into a DataFrame with clean text.
+
+    dedup_templates: if True (default), collapse near-duplicate messages
+    that differ only by an embedded number down to one representative
+    example each, using _template_key(). This is a no-op for datasets
+    without templated messages (e.g. the English SMS Spam Collection)
+    but is important for template-generated datasets to get an honest
+    train/test split.
+    """
     if path is None:
         path = DATA_PATHS[lang]
     df = pd.read_csv(path, sep="\t", header=None, names=["label", "text"])
     df = df.dropna(subset=["text"]).drop_duplicates(subset=["text"]).reset_index(drop=True)
     df["clean_text"] = df["text"].apply(lambda t: clean_text(t, lang))
+
+    if dedup_templates:
+        df["_template_key"] = df["clean_text"].apply(_template_key)
+        before = len(df)
+        df = df.drop_duplicates(subset=["_template_key"]).reset_index(drop=True)
+        removed = before - len(df)
+        if removed:
+            print(f"[{lang}] Removed {removed} near-duplicate templated messages "
+                  f"(same message shell, different embedded number) to avoid train/test leakage.")
+        df = df.drop(columns=["_template_key"])
+
     df["label_num"] = (df["label"] == "spam").astype(int)  # ham=0, spam=1
     return df
 

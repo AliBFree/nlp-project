@@ -460,9 +460,15 @@ body.lang-fa .hero-sub {
 
 /* Elements marked data-rtl-aware get dir="rtl" via JS; align their
    text and mirror the "tail" corner of message bubbles so they read
-   naturally as received messages in a right-to-left thread. */
-[data-rtl-aware] {
+   naturally as received messages in a right-to-left thread. The
+   selector below checks the actual dir value (not just attribute
+   presence) since these elements also exist in English/LTR mode. */
+[data-rtl-aware][dir="rtl"] {
   text-align: right;
+}
+
+[data-rtl-aware][dir="ltr"] {
+  text-align: left;
 }
 
 body.lang-fa .bubble {

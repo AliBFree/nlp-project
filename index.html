@@ -17,9 +17,9 @@
       <button type="button" data-lang="en" class="active">EN</button>
       <button type="button" data-lang="fa">فا</button>
     </div>
-    <p class="eyebrow">on-device text classifier</p>
-    <h1>Spam Sense</h1>
-    <p class="hero-sub">Paste any SMS. It's scored the instant you hit send — no server, no network call, just a model running in this tab.</p>
+    <p class="eyebrow" data-i18n="eyebrow">on-device text classifier</p>
+    <h1 data-i18n="heroTitle">Spam Sense</h1>
+    <p class="hero-sub" data-i18n="heroSub">Paste any SMS. It's scored the instant you hit send — no server, no network call, just a model running in this tab.</p>
   </header>
 
   <main class="layout">
@@ -31,7 +31,7 @@
         <div class="phone-header-title">
           <span class="phone-avatar">?</span>
           <div>
-            <p class="phone-name">Unknown Sender</p>
+            <p class="phone-name" data-i18n="phoneName">Unknown Sender</p>
             <p class="phone-status" id="modelStatus">loading model…</p>
           </div>
         </div>
@@ -39,7 +39,7 @@
 
       <div class="thread" id="thread" data-rtl-aware>
         <div class="thread-empty" id="threadEmpty">
-          <p>Messages you test will appear here, scored as ham or spam.</p>
+          <p data-i18n="emptyThread">Messages you test will appear here, scored as ham or spam.</p>
         </div>
       </div>
 
@@ -61,48 +61,48 @@
     </section>
 
     <!-- Detail / explanation panel -->
-    <aside class="panel">
-      <h2 class="panel-title">How to read a result</h2>
+    <aside class="panel" data-rtl-aware>
+      <h2 class="panel-title" data-i18n="panelTitleHow">How to read a result</h2>
 
       <div class="legend">
         <div class="legend-row">
           <span class="dot dot-ham"></span>
           <div>
-            <p class="legend-label">Ham</p>
-            <p class="legend-copy">A legitimate message. Rendered as a normal received bubble.</p>
+            <p class="legend-label" data-i18n="legendHamLabel">Ham</p>
+            <p class="legend-copy" data-i18n="legendHamCopy">A legitimate message. Rendered as a normal received bubble.</p>
           </div>
         </div>
         <div class="legend-row">
           <span class="dot dot-spam"></span>
           <div>
-            <p class="legend-label">Spam</p>
-            <p class="legend-copy">Unwanted or scam text. Flagged with a red receipt line.</p>
+            <p class="legend-label" data-i18n="legendSpamLabel">Spam</p>
+            <p class="legend-copy" data-i18n="legendSpamCopy">Unwanted or scam text. Flagged with a red receipt line.</p>
           </div>
         </div>
       </div>
 
       <div class="divider"></div>
 
-      <h2 class="panel-title">Try a sample</h2>
+      <h2 class="panel-title" data-i18n="panelTitleSample">Try a sample</h2>
       <div class="samples" id="samples">
         <!-- populated by script.js per active language -->
       </div>
 
       <div class="divider"></div>
 
-      <h2 class="panel-title">Model</h2>
+      <h2 class="panel-title" data-i18n="panelTitleModel">Model</h2>
       <dl class="stats">
-        <div class="stats-row"><dt>Type</dt><dd>TF-IDF + Logistic Regression</dd></div>
-        <div class="stats-row"><dt>Test accuracy</dt><dd>98.5%</dd></div>
-        <div class="stats-row"><dt>Test F1 (spam)</dt><dd>0.94</dd></div>
-        <div class="stats-row"><dt>Runs</dt><dd>entirely in your browser</dd></div>
+        <div class="stats-row"><dt data-i18n="statsTypeLabel">Type</dt><dd data-i18n="statsTypeValue">TF-IDF + Logistic Regression</dd></div>
+        <div class="stats-row"><dt data-i18n="statsAccuracyLabel">Test accuracy</dt><dd data-i18n="statsAccuracyValue">98.5%</dd></div>
+        <div class="stats-row"><dt data-i18n="statsF1Label">Test F1 (spam)</dt><dd data-i18n="statsF1Value">0.94</dd></div>
+        <div class="stats-row"><dt data-i18n="statsRunsLabel">Runs</dt><dd data-i18n="statsRunsValue">entirely in your browser</dd></div>
       </dl>
     </aside>
 
   </main>
 
-  <footer class="footer">
-    <p>English model trained on the SMS Spam Collection dataset (Almeida &amp; Hidalgo, UCI / Kaggle). Persian model trained on a separately collected Persian SMS dataset. Built as a learning project — not a production spam filter.</p>
+  <footer class="footer" data-rtl-aware>
+    <p data-i18n="footer">English model trained on the SMS Spam Collection dataset (Almeida &amp; Hidalgo, UCI / Kaggle). Persian model trained on a separately collected Persian SMS dataset. Built as a learning project — not a production spam filter.</p>
   </footer>
 
 </div>
