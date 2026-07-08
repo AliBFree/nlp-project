@@ -50,6 +50,39 @@ html, body {
   margin: 0 auto 48px;
 }
 
+/* ---------------- Language toggle ---------------- */
+.lang-toggle {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 22px;
+}
+
+.lang-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lang-toggle button.active {
+  background: var(--surface-raised);
+  color: var(--mint);
+}
+
+.lang-toggle button:hover:not(.active) {
+  color: var(--text);
+}
+
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -406,4 +439,49 @@ html, body {
 
 @media (prefers-reduced-motion: reduce) {
   .bubble-group { animation: none; }
+}
+
+/* ---------------------------------------------------------
+   Persian (RTL) mode
+   Applied via body.lang-fa, set by script.js when the user
+   switches languages. Swaps the base font to Vazirmatn (which
+   covers Persian glyphs properly) and mirrors the parts of the
+   layout that are direction-sensitive.
+--------------------------------------------------------- */
+body.lang-fa {
+  font-family: "Vazirmatn", var(--font-body);
+}
+
+body.lang-fa .eyebrow,
+body.lang-fa .hero h1,
+body.lang-fa .hero-sub {
+  font-family: "Vazirmatn", var(--font-display);
+}
+
+/* Elements marked data-rtl-aware get dir="rtl" via JS; align their
+   text and mirror the "tail" corner of message bubbles so they read
+   naturally as received messages in a right-to-left thread. */
+[data-rtl-aware] {
+  text-align: right;
+}
+
+body.lang-fa .bubble {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: 4px;
+  font-family: "Vazirmatn", var(--font-body);
+}
+
+body.lang-fa .receipt {
+  padding-left: 0;
+  padding-right: 4px;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+body.lang-fa .composer-input {
+  font-family: "Vazirmatn", var(--font-body);
+}
+
+body.lang-fa .sample-chip {
+  font-family: "Vazirmatn", var(--font-body);
 }

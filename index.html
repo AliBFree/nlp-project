@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spam Sense — SMS Spam Classifier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,6 +13,10 @@
 <div class="page">
 
   <header class="hero">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="fa">فا</button>
+    </div>
     <p class="eyebrow">on-device text classifier</p>
     <h1>Spam Sense</h1>
     <p class="hero-sub">Paste any SMS. It's scored the instant you hit send — no server, no network call, just a model running in this tab.</p>
@@ -33,7 +37,7 @@
         </div>
       </div>
 
-      <div class="thread" id="thread">
+      <div class="thread" id="thread" data-rtl-aware>
         <div class="thread-empty" id="threadEmpty">
           <p>Messages you test will appear here, scored as ham or spam.</p>
         </div>
@@ -46,6 +50,7 @@
           placeholder="Type or paste an SMS message…"
           rows="1"
           maxlength="1000"
+          data-rtl-aware
         ></textarea>
         <button type="submit" class="send-btn" id="sendBtn" aria-label="Classify message">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -80,10 +85,7 @@
 
       <h2 class="panel-title">Try a sample</h2>
       <div class="samples" id="samples">
-        <button class="sample-chip" data-text="Congratulations! You have been selected to win a free cruise. Call 09061234567 now to claim your prize!">Free cruise winner</button>
-        <button class="sample-chip" data-text="Hey, are we still on for dinner tonight at 7?">Dinner tonight?</button>
-        <button class="sample-chip" data-text="URGENT: Your account has been suspended. Click the link to verify your identity immediately.">Account suspended</button>
-        <button class="sample-chip" data-text="Can you pick up milk on your way home? Thanks!">Pick up milk</button>
+        <!-- populated by script.js per active language -->
       </div>
 
       <div class="divider"></div>
@@ -100,7 +102,7 @@
   </main>
 
   <footer class="footer">
-    <p>Trained on the SMS Spam Collection dataset (Almeida &amp; Hidalgo, UCI / Kaggle). Built as a learning project — not a production spam filter.</p>
+    <p>English model trained on the SMS Spam Collection dataset (Almeida &amp; Hidalgo, UCI / Kaggle). Persian model trained on a separately collected Persian SMS dataset. Built as a learning project — not a production spam filter.</p>
   </footer>
 
 </div>

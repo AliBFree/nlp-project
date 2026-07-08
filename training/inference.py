@@ -1,35 +1,34 @@
 """
 inference.py
 -------------
-Loads the saved model + vectorizer and predicts on new SMS text.
-This file is for local use only (e.g. testing, or a small Flask API)
--- the deployed web app on GitHub Pages does NOT use this file, since
-GitHub Pages cannot run Python. See web/js/script.js for the browser
-version of this same logic.
+Loads the saved model + vectorizer for a given language and predicts
+on new SMS text. Local/CLI use only -- the deployed web app does not
+use this file (GitHub Pages can't run Python); see js/script.js for
+the browser-side version of this same logic.
 
 Usage:
-    python inference.py "Congratulations! You have won a free prize, call now!"
+    python inference.py --lang en "Congratulations! You have won a free prize, call now!"
+    python inference.py --lang fa "..."
 """
 
-import sys
+import argparse
 import joblib
-from training.preprocess import clean_text
+from preprocess import clean_text
 
-MODEL_PATH = "model/model.joblib"
-VECTORIZER_PATH = "model/vectorizer.joblib"
+MODEL_DIR = "model"
 
 
-def load_artifacts():
-    model = joblib.load(MODEL_PATH)
-    vectorizer = joblib.load(VECTORIZER_PATH)
+def load_artifacts(lang: str):
+    model = joblib.load(f"{MODEL_DIR}/model_{lang}.joblib")
+    vectorizer = joblib.load(f"{MODEL_DIR}/vectorizer_{lang}.joblib")
     return model, vectorizer
 
 
-def predict(text: str, model=None, vectorizer=None) -> dict:
+def predict(text: str, lang: str = "en", model=None, vectorizer=None) -> dict:
     if model is None or vectorizer is None:
-        model, vectorizer = load_artifacts()
+        model, vectorizer = load_artifacts(lang)
 
-    cleaned = clean_text(text)
+    cleaned = clean_text(text, lang)
     vec = vectorizer.transform([cleaned])
     label_num = model.predict(vec)[0]
     proba = model.predict_proba(vec)[0]
@@ -41,12 +40,14 @@ def predict(text: str, model=None, vectorizer=None) -> dict:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('Usage: python inference.py "your message here"')
-        sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lang", choices=["en", "fa"], default="en")
+    parser.add_argument("message", nargs="+")
+    args = parser.parse_args()
 
-    message = " ".join(sys.argv[1:])
-    result = predict(message)
+    message = " ".join(args.message)
+    result = predict(message, lang=args.lang)
+    print(f"Language: {args.lang}")
     print(f"Message : {message}")
     print(f"Label   : {result['label']}")
     print(f"Confidence: {result['confidence'] * 100:.1f}%")

@@ -1,42 +1,67 @@
 """
 export_web_model.py
 --------------------
-Converts the trained scikit-learn artifacts (model/model.joblib,
-model/vectorizer.joblib) into a single JSON file that a plain
-JavaScript file can load and run entirely in the browser.
+Converts trained scikit-learn artifacts (model/model_<lang>.joblib,
+model/vectorizer_<lang>.joblib) into JSON files the browser can load
+and run entirely client-side.
 
-Why not TensorFlow.js? A TF-IDF + Logistic Regression model is just
-"vocabulary + idf weights + a weight per word + an intercept". That is
-plain data, so we can reimplement the (tiny) TF-IDF math directly in
-JavaScript and skip an entire model-conversion toolchain. This keeps
-the whole thing GitHub Pages friendly with zero backend.
+Run once per language, after train.py:
+    python export_web_model.py --lang en
+    python export_web_model.py --lang fa
 
-Run after train.py:
-    python export_web_model.py
+Writes to ../js/model_<lang>.json (i.e. the js/ folder at the repo
+root, next to script.js) since that's what GitHub Pages actually serves.
 """
 
+import argparse
 import json
+import os
 import joblib
 
-vectorizer = joblib.load("model/vectorizer.joblib")
-model = joblib.load("model/model.joblib")
+MODEL_DIR = "model"
+OUTPUT_DIR = "../js"  # repo_root/js -- adjust if your layout differs
 
-vocabulary = {term: int(idx) for term, idx in vectorizer.vocabulary_.items()}
-idf = vectorizer.idf_.tolist()
-coef = model.coef_[0].tolist()
-intercept = float(model.intercept_[0])
 
-web_model = {
-    "vocabulary": vocabulary,   # term -> feature index
-    "idf": idf,                 # idf weight per feature index
-    "coef": coef,                # logistic regression weight per feature index
-    "intercept": intercept,
-    "ngram_range": [1, 2],
-    "labels": {"0": "ham", "1": "spam"},
-}
+def export(lang: str):
+    vectorizer_path = f"{MODEL_DIR}/vectorizer_{lang}.joblib"
+    model_path = f"{MODEL_DIR}/model_{lang}.joblib"
 
-with open("web/js/model.json", "w") as f:
-    json.dump(web_model, f)
+    vectorizer = joblib.load(vectorizer_path)
+    model = joblib.load(model_path)
 
-size_kb = len(json.dumps(web_model)) / 1024
-print(f"Exported web/js/model.json ({size_kb:.1f} KB, {len(vocabulary)} vocab terms)")
+    vocabulary = {term: int(idx) for term, idx in vectorizer.vocabulary_.items()}
+    idf = vectorizer.idf_.tolist()
+    coef = model.coef_[0].tolist()
+    intercept = float(model.intercept_[0])
+
+    web_model = {
+        "lang": lang,
+        "vocabulary": vocabulary,
+        "idf": idf,
+        "coef": coef,
+        "intercept": intercept,
+        "ngram_range": [1, 2],
+        "labels": {"0": "ham", "1": "spam"},
+    }
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    out_path = f"{OUTPUT_DIR}/model_{lang}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(web_model, f, ensure_ascii=False)
+
+    size_kb = os.path.getsize(out_path) / 1024
+    print(f"[{lang}] Exported {out_path} ({size_kb:.1f} KB, {len(vocabulary)} vocab terms)")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lang", choices=["en", "fa", "all"], default="all")
+    args = parser.parse_args()
+
+    langs = ["en", "fa"] if args.lang == "all" else [args.lang]
+    for lang in langs:
+        model_exists = os.path.exists(f"{MODEL_DIR}/model_{lang}.joblib")
+        if not model_exists:
+            print(f"[{lang}] Skipped -- no trained model found. Run `python train.py --lang {lang}` first.")
+            continue
+        export(lang)
