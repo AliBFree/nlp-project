@@ -6,7 +6,7 @@ instantly — no server, no API call, no network request after the page
 loads. The model itself (a few hundred KB of JSON) runs directly in
 JavaScript.
 
-**[Live demo →](#)** *(replace with your GitHub Pages URL once deployed)*
+**[Live demo →](https://alibfree.github.io/nlp-project/)**
 
 ![status](https://img.shields.io/badge/status-learning_project-blue)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
