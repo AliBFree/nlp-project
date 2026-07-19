@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spam Sense — SMS Spam Classifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="fa">فا</button>
+    </div>
+    <p class="eyebrow" data-i18n="eyebrow">on-device text classifier</p>
+    <h1 data-i18n="heroTitle">Spam Sense</h1>
+    <p class="hero-sub" data-i18n="heroSub">Paste any SMS. It's scored the instant you hit send — no server, no network call, just a model running in this tab.</p>
+  </header>
+
+  <main class="layout">
+
+    <!-- Phone mockup: signature element -->
+    <section class="phone" aria-label="SMS classifier">
+      <div class="phone-notch"></div>
+      <div class="phone-header">
+        <div class="phone-header-title">
+          <span class="phone-avatar">?</span>
+          <div>
+            <p class="phone-name" data-i18n="phoneName">Unknown Sender</p>
+            <p class="phone-status" id="modelStatus">loading model…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="thread" id="thread" data-rtl-aware>
+        <div class="thread-empty" id="threadEmpty">
+          <p data-i18n="emptyThread">Messages you test will appear here, scored as ham or spam.</p>
+          <p class="thread-empty-hint" data-i18n="emptyThreadHint">Tap any message afterward to see why.</p>
+        </div>
+      </div>
+
+      <form class="composer" id="composerForm">
+        <textarea
+          id="messageInput"
+          class="composer-input"
+          placeholder="Type or paste an SMS message…"
+          rows="1"
+          maxlength="1000"
+          data-rtl-aware
+        ></textarea>
+        <button type="submit" class="send-btn" id="sendBtn" aria-label="Classify message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 12L21 3L14 21L11 13L3 12Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- Detail / explanation panel -->
+    <aside class="panel" data-rtl-aware>
+      <h2 class="panel-title" data-i18n="panelTitleHow">How to read a result</h2>
+
+      <div class="legend">
+        <div class="legend-row">
+          <span class="dot dot-ham"></span>
+          <div>
+            <p class="legend-label" data-i18n="legendHamLabel">Ham</p>
+            <p class="legend-copy" data-i18n="legendHamCopy">A legitimate message. Rendered as a normal received bubble.</p>
+          </div>
+        </div>
+        <div class="legend-row">
+          <span class="dot dot-spam"></span>
+          <div>
+            <p class="legend-label" data-i18n="legendSpamLabel">Spam</p>
+            <p class="legend-copy" data-i18n="legendSpamCopy">Unwanted or scam text. Flagged with a red receipt line.</p>
+          </div>
+        </div>
+        <div class="legend-row">
+          <span class="dot dot-explain"></span>
+          <div>
+            <p class="legend-label" data-i18n="legendExplainLabel">Tap a message</p>
+            <p class="legend-copy" data-i18n="legendExplainCopy">See exactly which words pushed the model's decision.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title" data-i18n="panelTitleSample">Try a sample</h2>
+      <div class="samples" id="samples">
+        <!-- populated by script.js per active language -->
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title" data-i18n="panelTitleModel">Model</h2>
+      <dl class="stats">
+        <div class="stats-row"><dt data-i18n="statsTypeLabel">Type</dt><dd data-i18n="statsTypeValue">TF-IDF + Logistic Regression</dd></div>
+        <div class="stats-row"><dt data-i18n="statsAccuracyLabel">Test accuracy</dt><dd data-i18n="statsAccuracyValue">98.5%</dd></div>
+        <div class="stats-row"><dt data-i18n="statsF1Label">Test F1 (spam)</dt><dd data-i18n="statsF1Value">0.94</dd></div>
+        <div class="stats-row"><dt data-i18n="statsRunsLabel">Runs</dt><dd data-i18n="statsRunsValue">entirely in your browser</dd></div>
+      </dl>
+    </aside>
+
+  </main>
+
+  <footer class="footer" data-rtl-aware>
+    <p data-i18n="footer">English model trained on the SMS Spam Collection dataset (Almeida &amp; Hidalgo, UCI / Kaggle). Persian model trained on a separately collected Persian SMS dataset. Built as a learning project — not a production spam filter.</p>
+  </footer>
+
+</div>
+
+<!--
+  Message bubble template (cloned per message by script.js).
+  The explain panel uses a CSS grid-rows 0fr→1fr trick so it can
+  animate open/closed without JS ever measuring pixel heights
+  (see .explain-wrap in style.css — an Accordion per the
+  animation-vocabulary skill).
+-->
+<template id="bubbleTemplate">
+  <div class="bubble-group">
+    <button type="button" class="bubble" aria-expanded="false"></button>
+    <div class="receipt">
+      <span class="tag"></span>
+      <span class="confidence-text"></span>
+      <span class="confidence-track"><span class="confidence-fill"></span></span>
+      <span class="explain-hint" data-i18n="tapHint">tap to see why</span>
+    </div>
+    <div class="explain-wrap">
+      <div class="explain-inner">
+        <div class="explain-panel">
+          <p class="explain-empty" data-i18n="explainEmpty" hidden>No familiar words found in this message.</p>
+          <p class="explain-mismatch" data-i18n="explainMismatch" hidden>Switch back to this message's language to see its explanation.</p>
+          <div class="explain-columns">
+            <div class="explain-col explain-col-spam">
+              <p class="explain-col-title" data-i18n="explainSpamPushing">Pushed toward spam</p>
+              <div class="chip-row chip-row-spam"></div>
+            </div>
+            <div class="explain-col explain-col-ham">
+              <p class="explain-col-title" data-i18n="explainHamPushing">Pushed toward ham</p>
+              <div class="chip-row chip-row-ham"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script src="js/script.js"></script>
+</body>
+</html>
